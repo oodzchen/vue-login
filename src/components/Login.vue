@@ -84,11 +84,11 @@ export default {
         phone: this.phone
       }).then(res => {
         if (!res.data.err_code) {
-          console.log('短信已发送', res.data)
+          // console.log('短信已发送', res.data)
         } else {
-          console.log('发送失败：', res.data.err_msg)
+          // console.log('发送失败：', res.data.err_msg)
           this.resetCount()
-          
+
           this.snackColor = 'error'
           this.snackText = res.data.err_msg
           this.snackbar = true
@@ -135,10 +135,10 @@ export default {
         authcode: this.authcode
       }).then(res => {
         if (!res.data.err_code) {
-          console.log('登录成功', res.data)
+          // console.log('登录成功', res.data)
           this.$router.push('/hello')
         } else {
-          console.log('登录失败： ', res.data.err_msg)
+          // console.log('登录失败： ', res.data.err_msg)
           this.snackColor = 'error'
           this.snackText = res.data.err_msg
           this.snackbar = true
