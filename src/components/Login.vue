@@ -70,37 +70,29 @@ export default {
   },
   methods: {
     sendCode () {
-      this.$refs.phoneInput.focus()
-      setTimeout(() => {
-        this.$refs.phoneInput.blur()
-      }, 0)
       if (!this.validatePhone()) return
       
       this.codeSent = true
       this.countSecond()
 
       // 使用mock接口
-      axios.post('/api/sendcode', {
-        phone: this.phone
-      }).then(res => {
-        if (!res.data.err_code) {
-          // console.log('短信已发送', res.data)
-        } else {
-          // console.log('发送失败：', res.data.err_msg)
-          this.resetCount()
-
-          this.snackColor = 'error'
-          this.snackText = res.data.err_msg
-          this.snackbar = true
-          setTimeout(() => {
-            this.snackText = ''
-          }, this.snackTimeout)
+      this.ajax('/api/sendcode', {
+        method: 'post',
+        data: {
+          phone: this.phone
         }
-      }).catch(err => {
-        if (err) throw err
+      }).then(data => {
+        if (data.err_code) {
+          this.resetCount()
+        }
       })
     },
     validatePhone () {
+      this.$refs.phoneInput.focus()
+      setTimeout(() => {
+        this.$refs.phoneInput.blur()
+      }, 0)
+
       return this.phoneRules.every(handler => {
         return handler.call(this, this.phone) === true
       })
@@ -130,24 +122,42 @@ export default {
       if (!this.$refs.form.validate()) return
 
       // 使用mock接口
-      axios.post('/api/login', {
-        phone: this.phone,
-        authcode: this.authcode
-      }).then(res => {
-        if (!res.data.err_code) {
-          // console.log('登录成功', res.data)
-          this.$router.push('/hello')
-        } else {
-          // console.log('登录失败： ', res.data.err_msg)
-          this.snackColor = 'error'
-          this.snackText = res.data.err_msg
-          this.snackbar = true
-          setTimeout(() => {
-            this.snackText = ''
-          }, this.snackTimeout)
+      this.ajax('/api/login', {
+        method: 'post',
+        data: {
+          phone: this.phone,
+          authcode: this.authcode
         }
-      }).catch(err => {
-        if (err) throw err
+      }).then(data => {
+        if (!data.err_code) {
+          this.$router.push('/hello')
+        }
+      })
+    },
+    showSnack (type, text) {
+      this.snackColor = type
+      this.snackText = text
+      this.snackbar = true
+      setTimeout(() => {
+        this.snackText = ''
+      }, this.snackTimeout)
+    },
+    ajax (url, options) {
+      let config = Object.assign({
+        url: url
+      }, options)
+
+      return new Promise((resolve, reject) => {
+        axios(config)
+          .then(res => {
+            resolve(res.data)
+            if (res.data.err_code) {
+              this.showSnack('error', res.data.err_msg)
+            }
+          })
+          .catch(err => {
+            if (err) throw err
+          })
       })
     }
   }
